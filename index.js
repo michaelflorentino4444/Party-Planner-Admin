@@ -1,6 +1,6 @@
 // === Constants ===
 const BASE = "https://fsa-crud-2aa9294fe819.herokuapp.com/api";
-const COHORT = ""; // Make sure to change this!
+const COHORT = "/2601-ftb-et-web-ft"; // Make sure to change this!
 const API = BASE + COHORT;
 
 // === State ===
@@ -52,6 +52,35 @@ async function getGuests() {
     const result = await response.json();
     guests = result.data;
     render();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// user can add a new party
+
+async function addParty(event) {
+  try {
+    await fetch(API, {
+      method: "POST",
+      header: { "Content-Type": "application/json" },
+      body: JSON.stringify(event),
+    });
+    await getParties();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+// user can delete a party
+
+async function removeParty(id) {
+  try {
+    await fetch(API + "/" + id, {
+      method: "DELETE",
+    });
+    selectedParty = undefined;
+    await getParties();
   } catch (e) {
     console.error(e);
   }
@@ -113,8 +142,8 @@ function GuestList() {
   const $ul = document.createElement("ul");
   const guestsAtParty = guests.filter((guest) =>
     rsvps.find(
-      (rsvp) => rsvp.guestId === guest.id && rsvp.eventId === selectedParty.id
-    )
+      (rsvp) => rsvp.guestId === guest.id && rsvp.eventId === selectedParty.id,
+    ),
   );
 
   // Simple components can also be created anonymously:
