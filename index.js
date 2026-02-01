@@ -59,12 +59,12 @@ async function getGuests() {
 
 // user can add a new party
 
-async function addParty(event) {
+async function addParty(party) {
   try {
-    await fetch(API, {
+    await fetch(API + "/events", {
       method: "POST",
-      header: { "Content-Type": "application/json" },
-      body: JSON.stringify(event),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(party),
     });
     await getParties();
   } catch (e) {
@@ -76,7 +76,7 @@ async function addParty(event) {
 
 async function removeParty(id) {
   try {
-    await fetch(API + "/" + id, {
+    await fetch(API + "/events/" + id, {
       method: "DELETE",
     });
     selectedParty = undefined;
@@ -131,8 +131,12 @@ function SelectedParty() {
     <address>${selectedParty.location}</address>
     <p>${selectedParty.description}</p>
     <GuestList></GuestList>
+    <button>Remove Party</button>
   `;
   $party.querySelector("GuestList").replaceWith(GuestList());
+
+  const $delete = $party.querySelector("button");
+  $delete.addEventListener("click", () => removeParty(selectedParty.id));
 
   return $party;
 }
@@ -157,6 +161,43 @@ function GuestList() {
   return $ul;
 }
 
+function NewPartyForm() {
+  const $form = document.createElement("form");
+  $form.innerHTML = `
+    <label>
+      Name
+      <input name="name" required />
+    </label>
+    <label>
+      Description
+      <input name="description" required />
+    </label>
+    <label>
+      Date
+      <input name="date" type="date" required />
+    </label>
+    <label>
+    Location
+      <input name="location" required />
+    <button>Add Party</button>
+  `;
+
+  $form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const data = new FormData($form);
+    const date = new Date(data.get("date")).toISOString();
+    addParty({
+      name: data.get("name"),
+      description: data.get("description"),
+      date,
+      location: data.get("location"),
+    });
+  });
+
+  return $form;
+}
+
 // === Render ===
 function render() {
   const $app = document.querySelector("#app");
@@ -166,6 +207,8 @@ function render() {
       <section>
         <h2>Upcoming Parties</h2>
         <PartyList></PartyList>
+        <h3>Add a New Party</h3>
+        <NewPartyForm></NewPartyForm>
       </section>
       <section id="selected">
         <h2>Party Details</h2>
@@ -176,6 +219,7 @@ function render() {
 
   $app.querySelector("PartyList").replaceWith(PartyList());
   $app.querySelector("SelectedParty").replaceWith(SelectedParty());
+  $app.querySelector("NewPartyForm").replaceWith(NewPartyForm());
 }
 
 async function init() {
