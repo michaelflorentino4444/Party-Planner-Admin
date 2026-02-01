@@ -186,11 +186,11 @@ function NewPartyForm() {
     event.preventDefault();
 
     const data = new FormData($form);
-    const date = new Date(data.get("date")).toISOString();
+
     addParty({
       name: data.get("name"),
       description: data.get("description"),
-      date,
+      date: new Date(data.get("date")).toISOString(),
       location: data.get("location"),
     });
   });
